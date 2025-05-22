@@ -1,0 +1,3 @@
+[submodule "LibNuclearesWeb"]
+	path = LibNuclearesWeb
+	url = https://github.com/ggppjj/LibNuclearesWeb.git

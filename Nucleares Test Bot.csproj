@@ -9,10 +9,20 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="LibNuclearesWeb\**" />
+    <EmbeddedResource Remove="LibNuclearesWeb\**" />
+    <None Remove="LibNuclearesWeb\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Discord.Net" Version="3.17.4" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.5" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.5" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="9.0.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="LibNuclearesWeb\LibNuclearesWeb.csproj" />
   </ItemGroup>
 
   <ItemGroup>

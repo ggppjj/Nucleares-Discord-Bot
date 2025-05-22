@@ -1,12 +1,14 @@
 ﻿using Discord;
 using Discord.Net;
 using Discord.WebSocket;
+using LibNuclearesWeb.NuclearesWeb;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 
 _ = args;
 
 var shutdown = new CancellationTokenSource();
+var nuclearesWebController = new NuclearesWeb();
 
 Console.CancelKeyPress += (_, e) =>
 {
@@ -42,28 +44,48 @@ await client.StartAsync();
 
 async Task ClientReady()
 {
-    var testCommand = new SlashCommandBuilder()
-        .WithName("test-command")
-        .WithDescription("Testing, 123!")
-        .Build();
+    List<ApplicationCommandProperties> applicationCommandProperties = [];
 
-    var globalCommands = await client.GetGlobalApplicationCommandsAsync();
+    applicationCommandProperties.Add(
+        new SlashCommandBuilder()
+            .WithName("execute-command")
+            .WithDescription("Execute a command on the running user's game!")
+            .AddOption(
+                "command",
+                ApplicationCommandOptionType.String,
+                "Command to run.",
+                isRequired: true
+            )
+            .Build()
+    );
 
-    if (!globalCommands.Any(c => c.Name == "test-command"))
+    try
     {
-        try
-        {
-            _ = await client.CreateGlobalApplicationCommandAsync(testCommand);
-        }
-        catch (HttpException exception)
-        {
-            Console.WriteLine(JsonConvert.SerializeObject(exception.Errors, Formatting.Indented));
-        }
+        _ = await client.BulkOverwriteGlobalApplicationCommandsAsync(
+            [.. applicationCommandProperties]
+        );
+    }
+    catch (HttpException exception)
+    {
+        Console.WriteLine(JsonConvert.SerializeObject(exception.Errors, Formatting.Indented));
     }
 }
 
-async Task SlashCommandHandler(SocketSlashCommand command) =>
-    await command.RespondAsync("so much boilerplate for a single slash command sheesh");
+async Task SlashCommandHandler(SocketSlashCommand command)
+{
+    switch (command.CommandName)
+    {
+        case "execute-command":
+            var response = nuclearesWebController.GetDataFromGameAsync(
+                command.Data.Options.First().Value.ToString()!
+            );
+            await command.RespondAsync(await response);
+            break;
+        default:
+            await command.RespondAsync("Command unknown, somehow!");
+            break;
+    }
+}
 
 try
 {
